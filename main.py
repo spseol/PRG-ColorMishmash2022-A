@@ -52,6 +52,11 @@ class Application(tk.Tk):
         self.scaleR.pack(side=LEFT, anchor=S)
         self.entryR = Entry(self.frameR, width=4, textvariable=self.varR)
         self.entryR.pack(side=LEFT, anchor=S)
+        
+        self.entryR.bind('<Key>', self.update)
+        
+
+
         # G složka
         self.lblG = Label(self.frameG, text="G", fg="#00ff00")
         self.lblG.pack(side=LEFT, anchor=S)
@@ -83,9 +88,40 @@ class Application(tk.Tk):
 
         self.canvasMain = tk.Canvas(self, width=300, height=200, bg="#123456")
         self.canvasMain.pack()
+        self.canvasMain.bind('<Button-1>', self.clickHandler)
         
         self.entryHex = tk.Entry(self, width=8)
         self.entryHex.pack(anchor='e')
+
+        self.frameMem = Frame(self)
+        self.frameMem.pack()
+        self.canvasMem = []
+        for row in range(3):
+            for column in range(7):
+                canvas = tk.Canvas(self.frameMem, width=50, height=50, bg='#654321')
+                canvas.grid(row=row, column=column)
+                canvas.bind('<Button-1>', self.clickHandler)
+                self.canvasMem.append(canvas)
+
+
+    def clickHandler(self, event):
+        if self.cget('cursor') != 'pencil':      # kliknu poprve
+            self.config(cursor='pencil')
+            self.color = event.widget.cget('bg')
+        else:                                    # kliknu podruhe
+            self.config(cursor='')
+            if event.widget is self.canvasMain:
+                self.canvasColor2Slids()
+            event.widget.config(bg=self.color)
+
+    def canvasColor2Slids(self):
+        print(self.color)
+        r = int( self.color[1:3] , 16)
+        g = int( self.color[3:5] , 16)
+        b = int( self.color[5:] , 16)
+        self.varR.set(r)
+        self.varG.set(g)
+        self.varB.set(b)
 
     def color_change(self, var=None, index=None, mode=None):
         print(var, index, mode)
@@ -99,9 +135,18 @@ class Application(tk.Tk):
         self.entryHex.delete(0, 'end')
         self.entryHex.insert(0, colorstring)
 
+    def colorSave(self):
+        with open("colors.txt", "w") as f:
+            f.write(self.canvasMain.cget("background") + "\n")
+            for canvas in self.canvasMem:
+                f.write(canvas.cget("background") + "\n")
 
     def quit(self, event=None):
+        self.colorSave()
         super().quit()
+
+    def update(self, event=None):
+        print(event.keycode, event.keysym, event.x, event.y)
 
 
 app = Application()
