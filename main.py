@@ -15,9 +15,7 @@ class Application(tk.Tk):
         super().__init__(className=self.name)
 
         self.title(self.name)
-
         self.bind("<Escape>", self.quit)
-
         self.lblHlavni = tk.Label(self, text="ColoMishMash")
         self.lblHlavni.pack()
 
